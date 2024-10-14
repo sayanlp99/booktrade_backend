@@ -12,5 +12,4 @@ urlpatterns = [
     path('login', views.obtain_auth_token, name='login'),
     path('checkUserToken', CheckUserTokenView.as_view(), name='check_user_token'),
     path('userDetails', UserDetailsView.as_view(), name='user_details'),
-    path('updatePushNotificationToken', UpdatePushNotificationTokenView.as_view(), name='update_push_notification_token')
 ]

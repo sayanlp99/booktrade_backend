@@ -133,18 +133,3 @@ class UserDetailsView(APIView):
         user_profile = UserProfile.objects.get(username=request.user.username)
         serializer = UserProfileSerializer(user_profile)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-class UpdatePushNotificationTokenView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    def post(self, request, *args, **kwargs):
-        serializer = UpdatePushNotificationTokenSerializer(data=request.data)
-        if serializer.is_valid():
-            push_notification_token = serializer.validated_data['push_notification_token']
-            user_profile = UserProfile.objects.get(username=request.user.username)
-            user_profile.push_notification_token = push_notification_token
-            user_profile.save()
-            response_data = {"message": "Push notification token updated successfully."}
-            return Response(response_data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

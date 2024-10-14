@@ -15,19 +15,15 @@ class RegisterAccountSerializer(serializers.Serializer):
     full_name = serializers.CharField()
     email = serializers.EmailField()
     password = serializers.CharField()
-    phone_number = serializers.CharField()
-    company_name = serializers.CharField()
-    address = serializers.CharField()
-    gst = serializers.CharField()
+    reading_preferences = serializers.CharField()
+    favorite_genres = serializers.CharField()
 
     def update(self, instance, validated_data):
         instance.full_name = validated_data.get('full_name', instance.full_name)
         instance.username = validated_data.get('username', instance.username)
         instance.email = validated_data.get('email', instance.email)
-        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
-        instance.company_name = validated_data.get('company_name', instance.company_name)
-        instance.address = validated_data.get('address', instance.address)
-        instance.gst = validated_data.get('gst', instance.gst)
+        reading_preferences = validated_data.get('reading_preferences', instance.reading_preferences)
+        favorite_genres = validated_data.get('favorite_genres', instance.favorite_genres)
         instance.user_registered = True
         instance.save()
         user = User.objects.create_user(
@@ -44,7 +40,7 @@ class ForgetPasswordChangeSerializer(serializers.Serializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['uuid', 'username', 'full_name', 'phone_number', 'email', 'company_name', 'address', 'gst']
+        fields = ['uuid', 'username', 'full_name', 'email', 'favorite_genres', 'reading_preferences']
 
 class UpdatePushNotificationTokenSerializer(serializers.Serializer):
     push_notification_token = serializers.CharField()
