@@ -9,4 +9,6 @@ class Book(models.Model):
     genre = models.CharField(max_length=50)
     condition = models.CharField(max_length=50)
     availability_status = models.BooleanField(default=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
     owner = models.UUIDField()

@@ -6,12 +6,24 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from authentication.models import UserProfile
 from django.db.models import Q
+from rest_framework.pagination import PageNumberPagination
+from math import radians, cos, sin, sqrt, atan2
+from rest_framework.decorators import action
 
 class BookViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    pagination_class = PageNumberPagination
+
+    def calculate_distance(self, lat1, lon1, lat2, lon2):
+        R = 6371
+        dlat = radians(lat2 - lat1)
+        dlon = radians(lon2 - lon1)
+        a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return R * c
 
     def list(self, request, *args, **kwargs):
         try:
@@ -72,14 +84,30 @@ class BookViewSet(viewsets.ModelViewSet):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     
+    @action(detail=False, methods=['get'], url_path='search', url_name='book_search')
     def search_books(self, request):
-        keyword = request.query_params.get('q')
-        if not keyword:
-            return Response({"error": "Search keyword 'q' is required"}, status=status.HTTP_400_BAD_REQUEST)
-        books = Book.objects.filter(
-            Q(title__icontains=keyword) | 
-            Q(author__icontains=keyword) | 
-            Q(genre__icontains=keyword)
-        )
-        serializer = BookSerializer(books, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        keyword = request.query_params.get('q', '')
+        genre = request.query_params.get('genre', '')
+        latitude = request.query_params.get('latitude', None)
+        longitude = request.query_params.get('longitude', None)
+        availability_status = request.query_params.get('available', '')
+        query = Q()
+        if keyword:
+            query &= Q(title__icontains=keyword) | Q(author__icontains=keyword) | Q(genre__icontains=keyword)
+        if genre:
+            query &= Q(genre__iexact=genre)
+        if availability_status:
+            query &= Q(availability_status=(availability_status.lower() == 'true'))
+        books = Book.objects.filter(query)
+        if latitude and longitude:
+            latitude = float(latitude)
+            longitude = float(longitude)
+            distance_threshold_km = 50
+            books = [
+                book for book in books
+                if self.calculate_distance(latitude, longitude, book.latitude, book.longitude) <= distance_threshold_km
+            ]
+        paginator = self.pagination_class()
+        paginated_books = paginator.paginate_queryset(books, request)
+        serializer = BookSerializer(paginated_books, many=True)
+        return paginator.get_paginated_response(serializer.data)
