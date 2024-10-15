@@ -22,8 +22,8 @@ class RegisterAccountSerializer(serializers.Serializer):
         instance.full_name = validated_data.get('full_name', instance.full_name)
         instance.username = validated_data.get('username', instance.username)
         instance.email = validated_data.get('email', instance.email)
-        reading_preferences = validated_data.get('reading_preferences', instance.reading_preferences)
-        favorite_genres = validated_data.get('favorite_genres', instance.favorite_genres)
+        instance.reading_preferences = validated_data.get('reading_preferences', instance.reading_preferences)
+        instance.favorite_genres = validated_data.get('favorite_genres', instance.favorite_genres)
         instance.user_registered = True
         instance.save()
         user = User.objects.create_user(

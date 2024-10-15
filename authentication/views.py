@@ -85,7 +85,7 @@ class ForgetPassowrdOtp(APIView):
                 send_forget_password_email_otp(email, otp)
                 response_data = {'uuid': user_instance.uuid}
             else:
-                response_data = {'msg': 'present'}
+                response_data = {'msg': 'not present'}
             return Response(response_data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
