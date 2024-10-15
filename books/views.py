@@ -40,7 +40,7 @@ class BookViewSet(viewsets.ModelViewSet):
             serializer = BookSaveSerializer(data=request.data)
             if serializer.is_valid():
                 user_profile = UserProfile.objects.get(username=request.user.username)
-                serializer.save(owner=user_profile.uuid)
+                serializer.save(owner=user_profile.uuid, created_on=int(time.time()))
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -82,6 +82,7 @@ class BookViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         
     
     @action(detail=False, methods=['get'], url_path='search', url_name='book_search')
@@ -97,7 +98,7 @@ class BookViewSet(viewsets.ModelViewSet):
         if genre:
             query &= Q(genre__iexact=genre)
         if availability_status:
-            query &= Q(availability_status=(availability_status.lower() == 'true'))
+            query &= Q(availability_status=(availability_status.lower() == 'true'))  
         books = Book.objects.filter(query)
         if latitude and longitude:
             latitude = float(latitude)
@@ -111,3 +112,19 @@ class BookViewSet(viewsets.ModelViewSet):
         paginated_books = paginator.paginate_queryset(books, request)
         serializer = BookSerializer(paginated_books, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+    
+    @action(detail=False, methods=['get'], url_path='all')
+    def get_all_books_except_mine(self, request, *args, **kwargs):
+        try:
+            user_profile = UserProfile.objects.get(username=request.user.username)
+            queryset = Book.objects.exclude(owner=user_profile.uuid).order_by('-created_on')            
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = BookSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            serializer = BookSerializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

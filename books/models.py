@@ -12,3 +12,4 @@ class Book(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     owner = models.UUIDField()
+    created_on = models.BigIntegerField()
