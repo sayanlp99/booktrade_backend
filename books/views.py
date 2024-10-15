@@ -36,7 +36,6 @@ class BookViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            print(request.data)
             serializer = BookSaveSerializer(data=request.data)
             if serializer.is_valid():
                 user_profile = UserProfile.objects.get(username=request.user.username)

@@ -19,9 +19,5 @@ class BookSerializer(serializers.ModelSerializer):
 class BookSaveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ['title', 'author', 'genre', 'condition', 'availability_status', 'longitude', 'latitude', 'created_on']
-
-    def create(self, validated_data):
-        validated_data['created_on'] = int(time.time()) 
-        return super().create(validated_data)
+        fields = ['title', 'author', 'genre', 'condition', 'availability_status', 'longitude', 'latitude']
 
