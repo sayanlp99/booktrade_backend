@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from authentication.models import UserProfile
 from .models import ExchangeRequest
 from .serializers import ExchangeRequestSerializer, ExchangeRequestCreateSerializer
 from django.utils.timezone import now
@@ -15,11 +16,10 @@ class ExchangeRequestViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            data = request.data.copy()
-            data['created_on'] = int(time.time())  # Add current epoch time
-            serializer = ExchangeRequestCreateSerializer(data=data)
+            serializer = ExchangeRequestCreateSerializer(data=request.data)
             if serializer.is_valid():
-                serializer.save()
+                user_profile = UserProfile.objects.get(username=request.user.username)
+                serializer.save(initiator=user_profile.uuid, created_on=int(time.time()))
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

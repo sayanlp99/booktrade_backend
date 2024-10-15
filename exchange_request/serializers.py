@@ -9,4 +9,4 @@ class ExchangeRequestSerializer(serializers.ModelSerializer):
 class ExchangeRequestCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExchangeRequest
-        fields = ['initiator', 'acceptor', 'initiator_book_id', 'acceptor_book_id', 'delivery_method', 'exchange_duration']
+        fields = ['acceptor', 'initiator_book_id', 'acceptor_book_id', 'delivery_method', 'exchange_duration']
