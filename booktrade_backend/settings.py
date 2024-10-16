@@ -12,12 +12,33 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import environ
+import firebase_admin
+from firebase_admin import credentials, storage
+
 env = environ.Env()
 environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+FIREBASE_CREDENTIALS = {
+    "type": env('FIREBASE_TYPE'),
+    "project_id": env('FIREBASE_PROJECT_ID'),
+    "private_key_id": env('FIREBASE_PRIVATE_KEY_ID'),
+    "private_key": env('FIREBASE_PRIVATE_KEY').replace('\\n', '\n'),  # Ensure line breaks are preserved
+    "client_email": env('FIREBASE_CLIENT_EMAIL'),
+    "client_id": env('FIREBASE_CLIENT_ID'),
+    "auth_uri": env('FIREBASE_AUTH_URI'),
+    "token_uri": env('FIREBASE_TOKEN_URI'),
+    "auth_provider_x509_cert_url": env('FIREBASE_AUTH_PROVIDER_X509_CERT_URL'),
+    "client_x509_cert_url": env('FIREBASE_CLIENT_X509_CERT_URL'),
+    "universe_domain": env('FIREBASE_UNIVERSE_DOMAIN')
+}
+
+firebase_cred = credentials.Certificate(FIREBASE_CREDENTIALS)
+firebase_app = firebase_admin.initialize_app(firebase_cred, {
+    'storageBucket': env('FIREBASE_STORAGE_BUCKET')
+})
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
