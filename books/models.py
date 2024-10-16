@@ -13,3 +13,5 @@ class Book(models.Model):
     longitude = models.FloatField()
     owner = models.UUIDField()
     created_on = models.BigIntegerField()
+    book_url = models.URLField(max_length=500, null=True, blank=True)
+    book_path = models.CharField(max_length=255, null=True, blank=True) 

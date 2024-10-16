@@ -1,3 +1,5 @@
+import time
+import uuid
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .models import Book
@@ -36,14 +38,39 @@ class BookViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            serializer = BookSaveSerializer(data=request.data)
-            if serializer.is_valid():
-                user_profile = UserProfile.objects.get(username=request.user.username)
-                serializer.save(owner=user_profile.uuid, created_on=int(time.time()))
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            image = request.FILES.get('image')  # Get the image from the request
+            if image:
+                # Validate the non-image fields
+                serializer = BookSaveSerializer(data=request.data)
+                if serializer.is_valid():
+                    user_profile = UserProfile.objects.get(username=request.user.username)
+
+                    # Initialize Firebase Storage
+                    bucket = storage.bucket()
+
+                    # Generate book path for Firebase storage
+                    book_id = str(uuid.uuid4())  # You can generate or use existing book_id logic
+                    book_path = f'books/images/{book_id}/{image.name}'
+
+                    # Upload the image to Firebase storage
+                    blob = bucket.blob(book_path)
+                    blob.upload_from_file(image)
+                    blob.make_public()  # Make the file publicly accessible
+
+                    # Save the book entry with the book_path (image path)
+                    book = serializer.save(owner=user_profile.uuid, created_on=int(time.time()), book_path=book_path)
+
+                    # Return the response with the serialized data
+                    return Response(BookSerializer(book).data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error": "No image provided"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
 
     def update(self, request, *args, **kwargs):
         try:
