@@ -65,7 +65,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'authentication',
     'books',
-    'exchange_request'
+    'exchange_request',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -77,7 +78,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
