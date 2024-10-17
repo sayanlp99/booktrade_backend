@@ -105,8 +105,7 @@ class ForgetPasswordChange(APIView):
                 user.save()
                 response_data = {'msg': 'ok'}
             else:
-                response_data = {'msg': 'present'}
-            return Response(response_data, status=status.HTTP_200_OK)
+                return Response({'msg': 'nok'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
