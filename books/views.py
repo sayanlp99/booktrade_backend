@@ -29,10 +29,15 @@ class BookViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            user_profile = UserProfile.objects.get(username=request.user.username)
-            queryset = Book.objects.filter(owner=user_profile.uuid)
-            serializer = BookSerializer(queryset, many=True)
+            user_id = request.query_params.get('userId')
+            if user_id:
+                books = Book.objects.filter(owner=user_id)
+            else:
+                books = Book.objects.all()  # Default to all books if no userId is provided
+            
+            serializer = BookSerializer(books, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -98,16 +103,17 @@ class BookViewSet(viewsets.ModelViewSet):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     
-    def get_books_by_user(self, request):
-        try:
-            user_id = request.query_params.get('userId')
-            if not user_id:
-                return Response({"error": "userId parameter is required"}, status=status.HTTP_400_BAD_REQUEST)        
-            books = Book.objects.filter(owner=user_id)
-            serializer = BookSerializer(books, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # @action(detail=False, methods=['get'], url_path='books')
+    # def get_books_by_user(self, request):
+    #     try:
+    #         user_id = request.query_params.get('userId')
+    #         if not user_id:
+    #             return Response({"error": "userId parameter is required"}, status=status.HTTP_400_BAD_REQUEST)        
+    #         books = Book.objects.filter(owner=user_id)
+    #         serializer = BookSerializer(books, many=True)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         
     

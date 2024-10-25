@@ -26,3 +26,8 @@ class BookSerializer(serializers.ModelSerializer):
             return user_profile.username
         except UserProfile.DoesNotExist:
             return None
+
+class BookSaveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = ['title', 'author', 'genre', 'condition', 'availability_status', 'longitude', 'latitude']
