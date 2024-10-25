@@ -5,10 +5,12 @@ from authentication.models import UserProfile
 
 class BookSerializer(serializers.ModelSerializer):
     book_url = serializers.SerializerMethodField()
+    owner_username = serializers.SerializerMethodField()  # Add this line
 
     class Meta:
         model = Book
-        fields = ['book_id', 'title', 'author', 'genre', 'condition', 'availability_status', 'latitude', 'longitude', 'book_url', 'book_path']
+        fields = ['book_id', 'title', 'author', 'genre', 'condition', 'availability_status', 
+                  'latitude', 'longitude', 'owner', 'owner_username', 'book_url', 'book_path']
 
     def get_book_url(self, obj):
         if obj.book_path:
@@ -17,15 +19,10 @@ class BookSerializer(serializers.ModelSerializer):
             signed_url = blob.public_url
             return signed_url
         return None
-    
-    def get_owner_name(self, obj):
+
+    def get_owner_username(self, obj):  # Add this method
         try:
             user_profile = UserProfile.objects.get(uuid=obj.owner)
             return user_profile.username
         except UserProfile.DoesNotExist:
             return None
-
-class BookSaveSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Book
-        fields = ['title', 'author', 'genre', 'condition', 'availability_status', 'longitude', 'latitude']
