@@ -33,7 +33,7 @@ class BookViewSet(viewsets.ModelViewSet):
             if user_id:
                 books = Book.objects.filter(owner=user_id)
             else:
-                books = Book.objects.all()  # Default to all books if no userId is provided
+                books = Book.objects.all() 
             
             serializer = BookSerializer(books, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -43,29 +43,18 @@ class BookViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            image = request.FILES.get('image')  # Get the image from the request
+            image = request.FILES.get('image') 
             if image:
-                # Validate the non-image fields
                 serializer = BookSaveSerializer(data=request.data)
                 if serializer.is_valid():
                     user_profile = UserProfile.objects.get(username=request.user.username)
-
-                    # Initialize Firebase Storage
                     bucket = storage.bucket()
-
-                    # Generate book path for Firebase storage
-                    book_id = str(uuid.uuid4())  # You can generate or use existing book_id logic
+                    book_id = str(uuid.uuid4())
                     book_path = f'books/images/{book_id}/{image.name}'
-
-                    # Upload the image to Firebase storage
                     blob = bucket.blob(book_path)
                     blob.upload_from_file(image)
-                    blob.make_public()  # Make the file publicly accessible
-
-                    # Save the book entry with the book_path (image path)
+                    blob.make_public() 
                     book = serializer.save(owner=user_profile.uuid, created_on=int(time.time()), book_path=book_path)
-
-                    # Return the response with the serialized data
                     return Response(BookSerializer(book).data, status=status.HTTP_201_CREATED)
                 else:
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -102,21 +91,7 @@ class BookViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    
-    # @action(detail=False, methods=['get'], url_path='books')
-    # def get_books_by_user(self, request):
-    #     try:
-    #         user_id = request.query_params.get('userId')
-    #         if not user_id:
-    #             return Response({"error": "userId parameter is required"}, status=status.HTTP_400_BAD_REQUEST)        
-    #         books = Book.objects.filter(owner=user_id)
-    #         serializer = BookSerializer(books, many=True)
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     except Exception as e:
-    #         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        
-    
     @action(detail=False, methods=['get'], url_path='search', url_name='book_search')
     def search_books(self, request):
         keyword = request.query_params.get('q', '')

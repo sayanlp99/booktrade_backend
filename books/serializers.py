@@ -5,8 +5,7 @@ from authentication.models import UserProfile
 
 class BookSerializer(serializers.ModelSerializer):
     book_url = serializers.SerializerMethodField()
-    owner_username = serializers.SerializerMethodField()  # Add this line
-
+    owner_username = serializers.SerializerMethodField()
     class Meta:
         model = Book
         fields = ['book_id', 'title', 'author', 'genre', 'condition', 'availability_status', 
@@ -20,7 +19,7 @@ class BookSerializer(serializers.ModelSerializer):
             return signed_url
         return None
 
-    def get_owner_username(self, obj):  # Add this method
+    def get_owner_username(self, obj):
         try:
             user_profile = UserProfile.objects.get(uuid=obj.owner)
             return user_profile.username
