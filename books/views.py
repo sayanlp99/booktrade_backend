@@ -33,7 +33,8 @@ class BookViewSet(viewsets.ModelViewSet):
             if user_id:
                 books = Book.objects.filter(owner=user_id)
             else:
-                books = Book.objects.all() 
+                user_profile = UserProfile.objects.get(username=request.user.username)
+                books = Book.objects.filter(owner=user_profile.uuid) 
             
             serializer = BookSerializer(books, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
