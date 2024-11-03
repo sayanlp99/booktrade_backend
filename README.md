@@ -39,7 +39,7 @@ BookTrade’s backend follows a monolithic architecture using Django with Django
 - **Firebase Storage** for storing and retrieving book images.
 - **Gmail SMTP** for OTP-based user authentication emails.
 
-![alt text](AD.png "Title")
+![AD.png](https://raw.githubusercontent.com/sayanlp99/booktrade/refs/heads/main/booktrade_design/AD.png)
 
 ## 3. Tech Stack
 
