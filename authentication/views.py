@@ -103,7 +103,7 @@ class ForgetPasswordChange(APIView):
                 user = User.objects.get(username=user_instance.username)
                 user.set_password(password)
                 user.save()
-                return Response({'msg': 'nok'}, status=status.HTTP_202_ACCEPTED)
+                return Response({'msg': 'ok'}, status=status.HTTP_202_ACCEPTED)
             else:
                 return Response({'msg': 'nok'}, status=status.HTTP_400_BAD_REQUEST)
         else:
